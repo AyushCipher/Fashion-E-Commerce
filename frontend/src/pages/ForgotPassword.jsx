@@ -6,7 +6,7 @@ import Navbar from "../component/Nav";
 import Footer from "../component/Footer";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
-import { authDataContext } from "../context/authContext";
+import { authDataContext } from "../context/AuthContext";
 
 function ForgotPassword() {
   const navigate = useNavigate();
