@@ -27,7 +27,7 @@ app.use(cookieParser());
 // CORS config
 app.use(
   cors({
-    origin: ['https://onecart-frontend-yoxg.onrender.com', 'https://onecart-admin-x2q9.onrender.com'], // frontend URLs
+    origin: ['https://onecart-frontend-yoxg.onrender.com', 'https://onecart-admin-1.onrender.com'], // frontend URLs
     credentials: true, // allow cookies to be sent
   })
 );
