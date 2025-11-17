@@ -13,7 +13,7 @@ function Orders() {
   let [orders,setOrders] = useState([])
   let {serverUrl} = useContext(authDataContext)
 
-    const fetchAllOrders =async () => {
+  const fetchAllOrders =async () => {
     try {
       const result = await axios.post(serverUrl + '/api/order/list' , {} ,{withCredentials:true})
       setOrders(result.data.reverse())
@@ -21,22 +21,23 @@ function Orders() {
     } catch (error) {
       console.log(error)
     }
-    
   }
-   const statusHandler = async (e , orderId) => {
-         try {
-          const result = await axios.post(serverUrl + '/api/order/status' , {orderId,status:e.target.value},{withCredentials:true})
-          if(result.data){
-            await fetchAllOrders()
-          }
-         } catch (error) {
-          console.log(error)
-          
-         }
+
+  const statusHandler = async (e, orderId) => {
+    try {
+      const result = await axios.post(serverUrl + '/api/order/status' , {orderId, status:e.target.value},{withCredentials:true})
+      if(result.data){
+        await fetchAllOrders()
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
+
   useEffect(()=>{
     fetchAllOrders()
   },[])
+
   return (
     <div className='w-[99vw] min-h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-[white]'>
       
@@ -47,8 +48,8 @@ function Orders() {
           <div className='w-[400px] h-[50px] text-[28px] md:text-[40px] mb-[20px] text-white'>All Orders List</div>
           {
            orders.map((order,index)=>(
-            <div key={index} className='w-[90%] h-[40%] bg-slate-600 rounded-xl flex lg:items-center items-start justify-between  flex-col lg:flex-row p-[10px] md:px-[20px]  gap-[20px]'>
-            <SiEbox  className='w-[60px] h-[60px] text-[black] p-[5px] rounded-lg bg-[white]'/>
+            <div key={index} className='w-[90%] h-[40%] bg-slate-600 rounded-xl flex lg:items-center items-start justify-between flex-col lg:flex-row p-[10px] md:px-[20px] gap-[20px]'>
+            <SiEbox className='w-[60px] h-[60px] text-[black] p-[5px] rounded-lg bg-[white]'/>
 
             <div>
               <div className='flex items-start justify-center flex-col gap-[5px] text-[16px] text-[#56dbfc]'>
@@ -59,7 +60,6 @@ function Orders() {
 
                     }else{
                        return <p key={index}>{item.name.toUpperCase()}  *  {item.quantity} <span>{item.size}</span>,</p>
-
                     }
                   })
                 }
@@ -72,14 +72,15 @@ function Orders() {
                   <p>{order.address.phone}</p>
                 </div>
             </div>
+
             <div className='text-[15px] text-green-100'>
                   <p>Items : {order.items.length}</p>
                   <p>Method : {order.paymentMethod}</p>
                   <p>Payment : {order.payment ? 'Done' : 'Pending'}</p>
                   <p>Date : {new Date(order.date).toLocaleDateString()}</p>
-                   <p className='text-[20px] text-[white]'> ₹ {order.amount}</p>
-                </div>
-                <select  value={order.status} className='px-[5px] py-[10px] bg-slate-500 rounded-lg border-[1px] border-[#96eef3]' onChange={(e)=>statusHandler(e,order._id)} >
+                  <p className='text-[20px] text-[white]'> ₹ {order.amount}</p>
+              </div>
+                <select value={order.status} className='px-[5px] py-[10px] bg-slate-500 rounded-lg border-[1px] border-[#96eef3]' onChange={(e)=>statusHandler(e, order._id)} >
                   <option value="Order Placed">Order Placed</option>
                   <option value="Packing">Packing</option>
                   <option value="Shipped">Shipped</option>

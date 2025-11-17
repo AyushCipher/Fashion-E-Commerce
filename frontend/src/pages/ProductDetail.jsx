@@ -1,128 +1,263 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { shopDataContext } from '../context/ShopContext'
+import React, { useContext, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { shopDataContext } from "../context/ShopContext";
+import { reviewDataContext } from "../context/ReviewContext";
 import { FaStar } from "react-icons/fa";
-import { FaStarHalfAlt } from "react-icons/fa";
-import RelatedProduct from '../component/RelatedProduct';
-import Loading from '../component/Loading';
+import { toast } from "react-toastify";
+import RelatedProduct from "../component/RelatedProduct";
+import Loading from "../component/Loading";
 
 function ProductDetail() {
-    let {productId} = useParams()
-    let {products,currency ,addtoCart ,loading} = useContext(shopDataContext)
-    let [productData,setProductData] = useState(false)
+  const { productId } = useParams();
+  const { products, currency, addtoCart, loading } = useContext(shopDataContext);
 
-    const [image, setImage] = useState('')
-  const [image1, setImage1] = useState('')
-  const [image2, setImage2] = useState('')
-  const [image3, setImage3] = useState('')
-  const [image4, setImage4] = useState('')
-  const [size, setSize] = useState('')
+  const { productReviews, getProductReviews, addReview } =
+    useContext(reviewDataContext);
 
+  const [productData, setProductData] = useState(null);
+  const [activeTab, setActiveTab] = useState("description");
 
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
 
-   const fetchProductData = async () => {
-    products.map((item) => {
-      if (item._id === productId) {
-        setProductData(item)
-        console.log(productData)
-        setImage1(item.image1)
-        setImage2(item.image2)
-        setImage3(item.image3)
-        setImage4(item.image4)
-        setImage(item.image1)
+  const [image, setImage] = useState("");
+  const [size, setSize] = useState("");
 
-        return null;
-      }
-
-    })
-  }
+  const fetchProductData = () => {
+    const product = products.find((item) => item._id === productId);
+    if (product) {
+      setProductData(product);
+      setImage(product.image1);
+    }
+  };
 
   useEffect(() => {
-    fetchProductData()
-  }, [productId, products])
+    fetchProductData();
+  }, [products, productId]);
+
+  useEffect(() => {
+    if (productId) getProductReviews(productId);
+  }, [productId]);
+
+  const avgRating =
+    productReviews.length > 0
+      ? (
+          productReviews.reduce((sum, r) => sum + r.rating, 0) /
+          productReviews.length
+        ).toFixed(1)
+      : 0;
+
+  const handleSubmitReview = async () => {
+    if (!rating) return toast.error("Please select a rating!");
+
+    const res = await addReview(productId, rating, comment);
+
+    if (res.success) {
+      toast.success("Review added!");
+      setRating(0);
+      setComment("");
+      getProductReviews(productId); // Refresh instantly
+    } else {
+      toast.error(res.msg);
+    }
+  };
+
   return productData ? (
-    <div >
-        <div className=' w-[99vw] h-[130vh] md:h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] flex items-center justify-start flex-col lg:flex-row gap-[20px]'>
-            <div className='lg:w-[50vw] md:w-[90vw] lg:h-[90vh] h-[50vh] mt-[70px] flex items-center justify-center md:gap-[10px] gap-[30px] flex-col-reverse lg:flex-row'>
-                <div className='lg:w-[20%] md:w-[80%] h-[10%] lg:h-[80%] flex items-center justify-center gap-[50px] lg:gap-[20px] lg:flex-col flex-wrap '>
-                    <div className='md:w-[100px]  w-[50px] h-[50px] md:h-[110px] bg-slate-300 border-[1px] border-[#80808049] rounded-md'>
-                        <img src={image1} alt="" className='w-[100%] h-[100%]  cursor-pointer rounded-md' onClick={()=>setImage(image1)}/>
-                    </div>
-                    <div className='md:w-[100px]  w-[50px] h-[50px] md:h-[110px] bg-slate-300 border-[1px] border-[#80808049] rounded-md'>
-                        <img src={image2} alt="" className='w-[100%] h-[100%]  cursor-pointer rounded-md' onClick={()=>setImage(image2)}/>
-                    </div>
-                    <div className='md:w-[100px]  w-[50px] h-[50px] md:h-[110px] bg-slate-300 border-[1px] border-[#80808049] rounded-md'>
-                        <img src={image3} alt="" className='w-[100%] h-[100%]  cursor-pointer rounded-md' onClick={()=>setImage(image3)}/>
-                    </div>
-                    <div className='md:w-[100px]  w-[50px] h-[50px] md:h-[110px] bg-slate-300 border-[1px] border-[#80808049] rounded-md'>
-                        <img src={image4} alt="" className='w-[100%] h-[100%]  cursor-pointer rounded-md' onClick={()=>setImage(image4)}/>
-                    </div>
-
-                </div>
-                <div className='lg:w-[60%] w-[80%] lg:h-[78%] h-[70%] border-[1px] border-[#80808049] rounded-md  overflow-hidden'>
-                    <img src={image} alt="" className=' w-[100%] lg:h-[100%] h-[100%] text-[30px] text-white  text-center rounded-md object-fill ' />
-                </div>
-            </div>
-
-            <div className='lg:w-[50vw] w-[100vw] lg:h-[75vh] h-[40vh] lg:mt-[80px] flex items-start justify-start flex-col py-[20px] px-[30px] md:pb-[20px] md:pl-[20px] lg:pl-[0px] lg:px-[0px] lg:py-[0px] gap-[10px]'>
-                <h1 className='text-[40px] font-semibold text-[aliceblue]'>{productData.name.toUpperCase()}</h1>
-                <div className='flex items-center gap-1 '>
-                    <FaStar className='text-[20px] fill-[#FFD700]' />
-                    <FaStar className='text-[20px] fill-[#FFD700]' />
-                    <FaStar className='text-[20px] fill-[#FFD700]' />
-                    <FaStar className='text-[20px] fill-[#FFD700]' />
-                    <FaStarHalfAlt className='text-[20px] fill-[#FFD700]' />
-                    <p className='text-[18px] font-semibold pl-[5px] text-[white]'>(124)</p>
-                </div>
-                <p className='text-[30px] font-semibold pl-[5px] text-[white]'>{currency} {productData.price}</p>
-
-                <p className=' w-[80%] md:w-[60%] text-[20px] font-semibold pl-[5px] text-[white]'>{productData.description} and Stylish, breathable cotton shirt with a modern slim fit. Easy to wash, super comfortable, and designed for effortless style.</p>
-                <div className='flex flex-col gap-[10px] my-[10px] '>
-                    <p className='text-[25px] font-semibold pl-[5px] text-[white]'>Select Size</p>
-          <div className='flex gap-2'>
-            {
-              productData.sizes.map((item, index) => (
-                <button key={index} className={`border py-2 px-4 bg-slate-300 rounded-md 
-                  ${item === size ? 'bg-black text-[#2f97f1] text-[20px]' : ''}`} onClick={() => setSize(item)}  >{item}</button>
-              ))
-            }
+    <div className="bg-gradient-to-l from-[#141414] to-[#0c2025] text-white min-h-screen">
+      {/* PRODUCT SECTION */}
+      <div className="flex flex-col lg:flex-row gap-8 px-6 lg:px-16 pt-24">
+        {/* LEFT IMAGES */}
+        <div className="flex flex-col lg:flex-row gap-4 w-full lg:w-1/2">
+          <div className="flex lg:flex-col gap-3">
+            {[productData.image1, productData.image2, productData.image3, productData.image4]
+              .filter(Boolean)
+              .map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  className="w-16 h-16 md:w-24 md:h-24 rounded cursor-pointer border border-gray-700"
+                  onClick={() => setImage(img)}
+                />
+              ))}
           </div>
-           <button className='text-[16px] active:bg-slate-500 cursor-pointer bg-[#495b61c9] py-[10px] px-[20px] rounded-2xl mt-[10px] border-[1px] border-[#80808049] text-white shadow-md shadow-black' onClick={()=>addtoCart(productData._id , size)} >{loading? <Loading/> : "Add to Cart"}</button>
-                </div>
-            <div className='w-[90%] h-[1px] bg-slate-700'></div>
-            <div className='w-[80%] text-[16px] text-white '>
 
-          <p>100% Original Product.</p>
-          <p>Cash on delivery is available on this product</p>
-          <p>East return and exchange policy within 7 days</p>
-            </div>
-            </div>
-
-
+          <img
+            src={image}
+            className="w-full h-[350px] object-contain rounded border border-gray-700"
+          />
         </div>
 
-        <div className='w-[100%] min-h-[70vh] bg-gradient-to-l from-[#141414] to-[#0c2025] flex items-start justify-start flex-col  overflow-x-hidden'>
+        {/* RIGHT PRODUCT INFO */}
+        <div className="w-full lg:w-1/2 space-y-4">
+          <h1 className="text-3xl font-bold">{productData.name}</h1>
 
-            <div className='flex px-[20px] mt-[90px] lg:ml-[80px] ml-[0px]  lg:mt-[0px]  '>
+          <div className="flex items-center gap-2">
+            {[...Array(5)].map((_, i) => (
+              <FaStar
+                key={i}
+                className={i < avgRating ? "text-yellow-400" : "text-gray-700"}
+              />
+            ))}
+            <span className="text-gray-400">({productReviews.length} reviews)</span>
+          </div>
 
-     <p className='border px-5 py-3 text-sm text-white'>
-       Description
-      </p>
-      <p className='border px-5 py-3 text-sm text-white'>
-       Reviews (124)
-      </p>
-     </div>
+          <p className="text-3xl font-semibold">{currency} {productData.price}</p>
 
-     <div className='w-[80%] md:h-[150px] h-[220px] bg-[#3336397c] border text-white text-[13px] md:text-[15px] lg:text-[20px] px-[10px] md:px-[30px] lg:ml-[100px] ml-[20px]'>
-        <p className='w-[95%] h-[90%] flex items-center justify-center '>
-      Upgrade your wardrobe with this stylish slim-fit cotton shirt, available now on OneCart. Crafted from breathable, high-quality fabric, it offers all-day comfort and effortless style. Easy to maintain and perfect for any setting, this shirt is a must-have essential for those who value both fashion and function.</p>
-     </div>
+          <p className="text-gray-300">{productData.description}</p>
 
-     <RelatedProduct category={productData.category} subCategory={productData.subCategory} currentProductId={productData._id}/>
+          <h2 className="text-lg font-semibold mt-4 mb-1">Select Size</h2>
+          <div className="flex gap-2">
+            {productData.sizes.map((s, i) => (
+              <button
+                key={i}
+                onClick={() => setSize(s)}
+                className={`px-4 py-2 rounded border ${
+                  s === size ? "bg-white text-black" : "bg-gray-800"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded shadow"
+            onClick={() => addtoCart(productData._id, size)}
+          >
+            {loading ? <Loading /> : "Add to Cart"}
+          </button>
+
+          <hr className="border-gray-700 my-4" />
+
+          <ul className="text-sm text-gray-400 space-y-1">
+            <li>✔ 100% Original Product</li>
+            <li>✔ Cash on Delivery Available</li>
+            <li>✔ Easy return & exchange in 7 days</li>
+          </ul>
         </div>
-      
+      </div>
+
+      {/* DESCRIPTION & REVIEWS */}
+      <div className="mt-16 px-6 lg:px-16">
+        
+        {/* TAB SWITCHER */}
+        <div className="flex gap-6 border-b border-gray-700">
+          <button
+            onClick={() => setActiveTab("description")}
+            className={`pb-2 ${
+              activeTab === "description"
+                ? "border-b-2 border-white font-semibold"
+                : "text-gray-400"
+            }`}
+          >
+            Description
+          </button>
+
+          <button
+            onClick={() => setActiveTab("reviews")}
+            className={`pb-2 ${
+              activeTab === "reviews"
+                ? "border-b-2 border-white font-semibold"
+                : "text-gray-400"
+            }`}
+          >
+            Reviews ({productReviews.length})
+          </button>
+        </div>
+
+        {/* DESCRIPTION CONTENT */}
+        {activeTab === "description" && (
+          <div className="mt-4 text-gray-300 text-lg w-full lg:w-2/3">
+            {productData.description}
+          </div>
+        )}
+
+        {/* REVIEWS SECTION */}
+        {activeTab === "reviews" && (
+          <div className="mt-6 space-y-6">
+            {/* WRITE REVIEW */}
+            <div className="p-6 bg-gray-900 rounded-lg border border-gray-700">
+              <h2 className="text-xl mb-2 font-semibold">Write a Review</h2>
+
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <FaStar
+                    key={star}
+                    onClick={() => setRating(star)}
+                    className={`cursor-pointer ${
+                      star <= rating ? "text-yellow-400" : "text-gray-600"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <textarea
+                className="mt-3 w-full bg-gray-800 border border-gray-700 p-3 rounded"
+                rows={3}
+                placeholder="Write your feedback..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+
+              <button
+                className="mt-3 px-5 py-2 bg-blue-600 rounded hover:bg-blue-500"
+                onClick={handleSubmitReview}
+              >
+                Submit Review
+              </button>
+            </div>
+
+            {/* REVIEWS LIST */}
+            <div>
+              {productReviews.length === 0 ? (
+                <p className="text-gray-500">No reviews yet. Be the first!</p>
+              ) : (
+                productReviews.map((rev, i) => (
+                  <div key={i} className="border-b border-gray-700 pb-4 mb-4">
+                    
+                    {/* User + Avatar */}
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-semibold">
+                        {rev?.user?.name?.slice(0, 1).toUpperCase()}
+                      </div>
+
+                      <div>
+                        <p className="font-medium">{rev?.user?.name}</p>
+                      </div>
+                    </div>
+
+                    {/* STAR RATING */}
+                    <div className="flex gap-1">
+                      {[...Array(rev.rating)].map((_, idx) => (
+                        <FaStar key={idx} className="text-yellow-400" />
+                      ))}
+                    </div>
+
+                    {/* COMMENT */}
+                    <p className="mt-1 text-gray-200">{rev.comment}</p>
+
+                    <p className="text-gray-500 text-xs mt-1">
+                      Reviewed on {new Date(rev.createdAt).toDateString()}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* RELATED PRODUCTS */}
+      <RelatedProduct
+        category={productData.category}
+        subCategory={productData.subCategory}
+        currentProductId={productData._id}
+        avgRating={avgRating}
+      />
     </div>
-  ) :<div className='opacity-0'></div>
+  ) : (
+    <div className="opacity-0"></div>
+  );
 }
 
-export default ProductDetail
+export default ProductDetail;

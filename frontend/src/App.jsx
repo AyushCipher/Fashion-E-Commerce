@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Registration from './pages/Registration'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
 import Nav from './component/Nav'
 import { userDataContext } from './context/UserContext'
 import About from './pages/About'
@@ -16,6 +17,8 @@ import Order from './pages/Order'
 import { ToastContainer } from 'react-toastify';
 import NotFound from './pages/NotFound'
 import Ai from './component/Ai'
+import ScrollToTop from './component/ScrollToTop'
+
 function App() {
 let {userData} = useContext(userDataContext)
 let location = useLocation()
@@ -23,6 +26,7 @@ let location = useLocation()
   return (
     <>
     <ToastContainer />
+    <ScrollToTop/>
     {userData && <Nav/>}
       <Routes>
 
@@ -34,6 +38,11 @@ let location = useLocation()
         <Route path='/signup' 
         element={userData ? (<Navigate to={location.state?.from || "/"}/> ) 
         : (<Registration/>)}/>
+
+        <Route path="/forgotpassword" 
+        element={!userData ? <ForgotPassword /> : <Navigate to="/" />}
+        />
+
 
         <Route path='/' 
         element={userData ? <Home/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
@@ -49,18 +58,21 @@ let location = useLocation()
 
         <Route path='/contact' 
         element={userData ? <Contact/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
+        
         <Route path='/productdetail/:productId' 
         element={userData ? <ProductDetail/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
 
         <Route path='/cart' 
         element={userData ? <Cart/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
 
-          <Route path='/placeorder' 
+        <Route path='/placeorder' 
         element={userData ? <PlaceOrder/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
-         <Route path='/order' 
+         
+        <Route path='/order' 
         element={userData ? <Order/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
 
         <Route path='*' element={<NotFound/>}/>
+        
       </Routes>
       <Ai/>
     </>

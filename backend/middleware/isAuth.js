@@ -1,26 +1,25 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+import User from '../model/userModel.js';
 
+const isAuth = async (req, res, next) => {
+  try {
+    const { token } = req.cookies;
 
-const isAuth = async (req,res,next) => {
-    try {
-        let {token} = req.cookies
-        
-        if(!token){
-            return res.status(400).json({message:"user does not have token"})
-        }
-        let verifyToken = jwt.verify(token,process.env.JWT_SECRET)
+    if (!token)
+      return res.status(401).json({ message: "Unauthorized" });
 
-        if(!verifyToken){
-            return res.status(400).json({message:"user does not have a valid token"})
-        }
-        req.userId = verifyToken.userId
-        next()
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    } catch (error) {
-         console.log("isAuth error")
-    return res.status(500).json({message:`isAuth error ${error}`})
-        
-    }
-}
+    const user = await User.findById(decoded.userId);
+    if (!user)
+      return res.status(404).json({ message: "User not found" });
 
-export default isAuth
+    req.userId = user._id;
+    next();
+
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid Token" });
+  }
+};
+
+export default isAuth;

@@ -21,15 +21,15 @@ function Login() {
             setLoading(true)
             e.preventDefault()
             try {
-              const result = await axios.post(serverUrl + '/api/auth/adminlogin',{email , password} , {withCredentials:true})
+              const result = await axios.post(serverUrl + '/api/auth/adminlogin',{email, password}, {withCredentials:true})
               console.log(result.data)
-              toast.success("AdminLogin Successfully")
+              toast.success("Admin Login Successfully")
               getAdmin()
               navigate("/")
               setLoading(false)
             } catch (error) {
               console.log(error)
-              toast.error("AdminLogin Failed")
+              toast.error("Admin Login Failed")
               setLoading(false)
             }
             
@@ -38,7 +38,7 @@ function Login() {
     <div className='w-[100vw] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-[white] flex flex-col items-center justify-start'>
        <div className='w-[100%] h-[80px] flex items-center justify-start px-[30px] gap-[10px] cursor-pointer' >
        <img className='w-[40px]' src={logo} alt="" />
-       <h1 className='text-[22px] font-sans '>OneCart</h1>
+       <h1 className='text-[22px] font-sans'>OneCart</h1>
        </div>
    
        <div className='w-[100%] h-[100px] flex items-center justify-center flex-col gap-[10px]'>

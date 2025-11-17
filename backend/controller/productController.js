@@ -14,42 +14,40 @@ export const addProduct = async (req,res) => {
         let productData = {
             name,
             description,
-            price :Number(price),
+            price: Number(price),
             category,
             subCategory,
-            sizes :JSON.parse(sizes),
-            bestseller :bestseller === "true" ? true : false,
-            date :Date.now(),
+            sizes: JSON.parse(sizes),
+            bestseller: bestseller === "true" ? true : false,
+            date: Date.now(),
             image1,
             image2,
             image3,
             image4
-            
         }
 
         const product = await Product.create(productData)
 
         return res.status(201).json(product)
-
+ 
     } catch (error) {
-          console.log("AddProduct error")
-    return res.status(500).json({message:`AddProduct error ${error}`})
+        console.log("Add Product error")
+        return res.status(500).json({message:`Add Product error: ${error}`})
     }
-    
 }
 
 
 export const listProduct = async (req,res) => {
-     
     try {
         const product = await Product.find({});
         return res.status(200).json(product)
 
     } catch (error) {
         console.log("ListProduct error")
-    return res.status(500).json({message:`ListProduct error ${error}`})
+        return res.status(500).json({message:`List Product error: ${error}`})
     }
 }
+
 
 export const removeProduct = async (req,res) => {
     try {
@@ -57,8 +55,7 @@ export const removeProduct = async (req,res) => {
         const product = await Product.findByIdAndDelete(id)
          return res.status(200).json(product)
     } catch (error) {
-        console.log("RemoveProduct error")
-    return res.status(500).json({message:`RemoveProduct error ${error}`})
+        console.log("Remove Product error")
+    return res.status(500).json({message:`RemoveProduct error: ${error}`})
     }
-    
 }

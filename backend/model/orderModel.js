@@ -1,13 +1,12 @@
 import mongoose from "mongoose";
 
-
 const orderSchema = new mongoose.Schema({
     userId: {
         type:String,
         required: true
     },
     items: {
-          type:Array,
+        type:Array,
         required: true
     },
     amount: {
@@ -36,8 +35,8 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required:true
     }
-},{timestamps:true}) 
+}, {timestamps:true}) 
 
-const Order = mongoose.model('Order' , orderSchema)
+const Order = mongoose.model('Order', orderSchema)
 
 export default Order

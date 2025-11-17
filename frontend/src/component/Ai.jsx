@@ -10,11 +10,10 @@ function Ai() {
   let [activeAi,setActiveAi] = useState(false)
   let openingSound = new Audio(open)
 
- function speak(message){
-let utterence=new SpeechSynthesisUtterance(message)
-window.speechSynthesis.speak(utterence)
+  function speak(message){
+    let utterence=new SpeechSynthesisUtterance(message)
+    window.speechSynthesis.speak(utterence)
   }
-
 
   const speechRecognition=window.SpeechRecognition || window.webkitSpeechRecognition
   const recognition = new speechRecognition()
@@ -24,7 +23,7 @@ window.speechSynthesis.speak(utterence)
 
   recognition.onresult = (e)=>{
     const transcript = e.results[0][0].transcript.trim();
- if(transcript.toLowerCase().includes("search") && transcript.toLowerCase().includes("open") && !showSearch){
+    if(transcript.toLowerCase().includes("search") && transcript.toLowerCase().includes("open") && !showSearch){
       speak("opening search")
       setShowSearch(true) 
       navigate("/collection")
@@ -67,13 +66,14 @@ window.speechSynthesis.speak(utterence)
     else{
       toast.error("Try Again")
     }
-
   }
+  
   recognition.onend=()=>{
    setActiveAi(false)
   }
+
   return (
-    <div className='fixed lg:bottom-[20px] md:bottom-[40px] bottom-[80px] left-[2%] ' onClick={()=>{recognition.start();
+    <div className='fixed lg:bottom-[20px] md:bottom-[40px] bottom-[80px] left-[2%]' onClick={()=>{recognition.start();
     openingSound.play()
     setActiveAi(true)
     }}>

@@ -6,16 +6,20 @@ import { BrowserRouter } from 'react-router-dom'
 import AuthContext from './context/authContext.jsx'
 import UserContext from './context/UserContext.jsx'
 import ShopContext from './context/ShopContext.jsx'
+import ReviewContext from './context/ReviewContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-  <AuthContext>
-    <UserContext>
-      <ShopContext>
-    <App />
-    </ShopContext>
-    </UserContext>
+    <AuthContext>
+      <UserContext>
+        <ShopContext>
+          <ReviewContext>
+            <App />
+          </ReviewContext>
+        </ShopContext>
+      </UserContext>
     </AuthContext>
-</BrowserRouter>
+
+  </BrowserRouter>
   
 )

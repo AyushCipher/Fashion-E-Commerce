@@ -1,12 +1,17 @@
-import express from 'express'
+import express from "express";
+import isAuth from "../middleware/isAuth.js";
+import {
+  addToCart,
+  getUserCart,
+  updateCart,
+  deleteCartItem
+} from "../controller/cartController.js";
 
-import isAuth from '../middleware/isAuth.js'
-import { addToCart, getUserCart, UpdateCart } from '../controller/cartController.js'
-const cartRoutes = express.Router()
+const cartRoutes = express.Router();
 
-cartRoutes.post('/get',isAuth,getUserCart)
-cartRoutes.post('/add',isAuth,addToCart)
-cartRoutes.post('/update',isAuth,UpdateCart)
+cartRoutes.get('/get', isAuth, getUserCart);     // changed to GET
+cartRoutes.post('/add', isAuth, addToCart);
+cartRoutes.put('/update', isAuth, updateCart);   // changed to PUT
+cartRoutes.delete('/remove', isAuth, deleteCartItem); // new delete route
 
-
-export default cartRoutes
+export default cartRoutes;

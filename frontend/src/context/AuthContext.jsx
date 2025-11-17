@@ -7,14 +7,12 @@ function AuthContext({children}) {
     let value = {
        serverUrl
     }
-  return (
 
-    
+  return (
     <div>
         <authDataContext.Provider value={value}>
             {children}
         </authDataContext.Provider>
-      
     </div>
   )
 }

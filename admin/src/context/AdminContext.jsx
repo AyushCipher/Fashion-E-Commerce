@@ -10,10 +10,10 @@ function AdminContext({children}) {
 
     const getAdmin = async () => {
       try {
-           let result = await axios.get(serverUrl + "/api/user/getadmin",{withCredentials:true})
+        let result = await axios.get(serverUrl + "/api/user/getadmin",{withCredentials:true})
 
-      setAdminData(result.data)
-      console.log(result.data)
+        setAdminData(result.data)
+        console.log(result.data)
       } catch (error) {
         setAdminData(null)
         console.log(error)
@@ -26,14 +26,15 @@ function AdminContext({children}) {
 
 
     let value = {
-adminData,setAdminData,getAdmin
+      adminData,setAdminData,getAdmin
     }
+
+    
   return (
     <div>
-<adminDataContext.Provider value={value}>
-    {children}
-</adminDataContext.Provider>
-      
+      <adminDataContext.Provider value={value}>
+        {children}
+      </adminDataContext.Provider>
     </div>
   )
 }

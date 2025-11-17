@@ -1,83 +1,151 @@
-import React, { useContext, useEffect, useState } from 'react'
-import Title from '../component/Title'
-import { shopDataContext } from '../context/ShopContext'
-import { useNavigate } from 'react-router-dom'
-import { RiDeleteBin6Line } from "react-icons/ri";
-import CartTotal from '../component/CartTotal';
+import React, { useContext } from "react";
+import { shopDataContext } from "../context/ShopContext";
+import { useNavigate } from "react-router-dom";
+import { FaTrash } from "react-icons/fa";
+import Loading from "../component/Loading";
+import { authDataContext } from "../context/authContext";
 
 function Cart() {
-    const { products, currency, cartItem ,updateQuantity } = useContext(shopDataContext)
-  const [cartData, setCartData] = useState([])
-  const navigate = useNavigate()
+  const {
+    cartItem,
+    products,
+    currency,
+    getCartAmount,
+    updateQuantity,
+    removeFromCart,
+    loading,
+  } = useContext(shopDataContext);
 
+  const { serverUrl } = useContext(authDataContext);
 
-  useEffect(() => {
-    const tempData = [];
-    for (const items in cartItem) {
-      for (const item in cartItem[items]) {
-        if (cartItem[items][item] > 0) {
-          tempData.push({
-            _id: items,
-            size: item,
-            quantity: cartItem[items][item],
-          });
-        }
-      }
-    }
-    setCartData(tempData); 
+  const navigate = useNavigate();
 
-  }, [cartItem]);
-  return (
-    <div className='w-[99vw] min-h-[100vh] p-[20px] overflow-hidden bg-gradient-to-l from-[#141414] to-[#0c2025] '>
-      <div className='h-[8%] w-[100%] text-center mt-[80px]'>
-        <Title text1={'YOUR'} text2={'CART'} />
-      </div>
+  if (loading) return <Loading />;
 
-      <div className='w-[100%] h-[92%] flex flex-wrap gap-[20px]'>
-        {
-         cartData.map((item,index)=>{
-             const productData = products.find((product) => product._id === item._id);
-            
-             return (
-              <div key={index} className='w-[100%] h-[10%] border-t border-b  '>
-                <div className='w-[100%] h-[80%] flex items-start gap-6 bg-[#51808048]  py-[10px] px-[20px] rounded-2xl relative '>
-                    <img className='w-[100px] h-[100px] rounded-md ' src={productData.image1} alt="" />
-                    <div className='flex items-start justify-center flex-col gap-[10px]'>
-                    <p className='md:text-[25px] text-[20px] text-[#f3f9fc]'>{productData.name}</p>
-                    <div className='flex items-center   gap-[20px]'>
-                      <p className='text-[20px] text-[#aaf4e7]'>{currency} {productData.price}</p>
-                      <p className='w-[40px] h-[40px] text-[16px] text-[white] 
-                      bg-[#518080b4] rounded-md mt-[5px] flex items-center justify-center border-[1px] border-[#9ff9f9]'>{item.size}</p>
-                </div>
-                </div>
-                <input type="number" min={1} defaultValue={item.quantity} className=' md:max-w-20 max-w-10 md:px-2 md:py-2 py-[5px] px-[10px] text-[white] text-[18px] font-semibold bg-[#518080b4] absolute md:top-[40%] top-[46%] left-[75%] md:left-[50%] border-[1px] border-[#9ff9f9] rounded-md '  onChange={(e)=> (e.target.value === ' ' || e.target.value === '0') ? null  :  updateQuantity(item._id,item.size,Number(e.target.value))} />
+  const cartEntries = [];
 
-                <RiDeleteBin6Line  className='text-[#9ff9f9] w-[25px] h-[25px] absolute top-[50%] md:top-[40%] md:right-[5%] right-1' onClick={()=>updateQuantity(item._id,item.size,0)}/>
-                </div>
- 
-              </div>
-             )
-         })
-        }
-      </div>
+  // Convert cart object → list
+  for (let productId in cartItem) {
+  const product = products.find((p) => p._id === productId);
+  if (!product) continue;
 
-      <div className='flex justify-start items-end my-20'>
-        <div className='w-full sm:w-[450px]'>
-            <CartTotal/>
-            <button className='text-[18px] hover:bg-slate-500 cursor-pointer bg-[#51808048] py-[10px] px-[50px] rounded-2xl text-white flex items-center justify-center gap-[20px]  border-[1px] border-[#80808049] ml-[30px] mt-[20px]' onClick={()=>{
-                if (cartData.length > 0) {
-      navigate("/placeorder");
-    } else {
-      console.log("Your cart is empty!");
-    }
-            }}>
-                PROCEED TO CHECKOUT
-            </button>
-        </div>
-      </div>
-      
-    </div>
-  )
+  for (let size in cartItem[productId]) {
+    cartEntries.push({
+      productId,
+      name: product.name,
+      price: product.price,
+      image: product.image1,
+      size,
+      quantity: cartItem[productId][size],
+    });
+  }
 }
 
-export default Cart
+
+  const totalAmount = getCartAmount();
+
+  return (
+    <div className="w-full min-h-screen bg-gradient-to-l from-[#141414] to-[#0c2025] text-white p-6 ">
+      <h2 className="text-3xl font-bold text-center mt-16 mb-10">Your Cart</h2>
+
+      {cartEntries.length === 0 ? (
+        <div className="text-center text-gray-300 mt-20">
+          <p className="text-2xl mb-4">Your cart is empty 😢</p>
+          <button
+            onClick={() => navigate("/collection")}
+            className="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-400 font-semibold"
+          >
+            Shop Now
+          </button>
+        </div>
+      ) : (
+        <div className="max-w-5xl mx-auto flex flex-col gap-6 overflow-y-auto">
+          {cartEntries.map((item) => (
+            <div
+              key={`${item.productId}-${item.size}`}
+              className="flex bg-white/10 p-4 rounded-xl shadow border border-white/20 backdrop-blur-md"
+            >
+              <img
+                src={
+                  item.image?.startsWith("http")
+                    ? item.image
+                    : `${serverUrl}/${item.image}`
+                }
+                alt={item.name}
+                className="w-28 h-28 object-cover rounded-lg"
+              />
+
+              <div className="flex flex-col justify-between ml-4 flex-grow">
+                <div>
+                  <h3 className="text-xl font-semibold">{item.name}</h3>
+                  <p className="text-sm text-gray-400">Size: {item.size}</p>
+                </div>
+
+                <p className="text-lg">
+                  {currency} {item.price} × {item.quantity}
+                </p>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() =>
+                      updateQuantity(item.productId, item.size, item.quantity - 1)
+                    }
+                    className="w-8 h-8 flex items-center justify-center bg-gray-700 rounded-md"
+                  >
+                    -
+                  </button>
+
+                  <span className="text-lg">{item.quantity}</span>
+
+                  <button
+                    onClick={() =>
+                      updateQuantity(item.productId, item.size, item.quantity + 1)
+                    }
+                    className="w-8 h-8 flex items-center justify-center bg-gray-700 rounded-md"
+                  >
+                    +
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      removeFromCart(item.productId, item.size)
+                    }
+                    className="ml-auto"
+                  >
+                    <FaTrash className="text-red-500 hover:text-red-400 text-lg" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Order Summary */}
+          <div className="mt-6 bg-white/10 p-6 rounded-xl border border-white/20 backdrop-blur-md mb-19">
+            <h3 className="text-2xl font-bold mb-4">Order Summary</h3>
+
+            <div className="flex justify-between text-lg">
+              <span>Total Items</span>
+              <span>{cartEntries.length}</span>
+            </div>
+
+            <div className="flex justify-between text-xl font-semibold mt-3">
+              <span>Total Amount</span>
+              <span>
+                {currency} {totalAmount}
+              </span>
+            </div>
+
+            <button
+              onClick={() => navigate("/placeorder")}
+              className="w-full py-3 mt-6 bg-blue-500 hover:bg-blue-400 text-black font-bold rounded-lg"
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Cart;

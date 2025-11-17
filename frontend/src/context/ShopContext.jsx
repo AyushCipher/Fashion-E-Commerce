@@ -1,163 +1,204 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { authDataContext } from './authContext'
-import axios from 'axios'
-import { userDataContext } from './UserContext'
-import { toast } from 'react-toastify'
+import React, { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { authDataContext } from "./authContext";
+import { userDataContext } from "./UserContext";
+import { toast } from "react-toastify";
 
- export const shopDataContext = createContext()
-function ShopContext({children}) {
+export const shopDataContext = createContext();
 
-    let [products,setProducts] = useState([])
-    let [search,setSearch] = useState('')
-    let {userData} = useContext(userDataContext)
-    let [showSearch,setShowSearch] = useState(false)
-    let {serverUrl} = useContext(authDataContext)
-    let [cartItem, setCartItem] = useState({});
-      let [loading,setLoading] = useState(false)
-    let currency = '₹';
-    let delivery_fee = 40;
+function ShopContext({ children }) {
+  const [products, setProducts] = useState([]);
+  const [search, setSearch] = useState("");
+  const { userData } = useContext(userDataContext);
+  const [showSearch, setShowSearch] = useState(false);
+  const { serverUrl } = useContext(authDataContext);
+  const [cartItem, setCartItem] = useState({});
+  const [loading, setLoading] = useState(false);
 
-    const getProducts = async () => {
-        try {
-            let result = await axios.get(serverUrl + "/api/product/list")
-            console.log(result.data)
-            setProducts(result.data)
-        } catch (error) {
-            console.log(error)
-        }
-        
+  const currency = "₹";
+  const delivery_fee = 40;
+
+  // ==============================
+  // FETCH PRODUCTS
+  // ==============================
+  const getProducts = async () => {
+    try {
+      const res = await axios.get(serverUrl + "/api/product/list");
+      setProducts(res.data);
+    } catch (err) {
+      console.log(err);
     }
+  };
 
+  // ==============================
+  // FETCH USER CART
+  // ==============================
+  const getUserCart = async () => {
+    if (!userData) return setCartItem({}); // guest user
 
-    const addtoCart = async (itemId , size) => {
-       if (!size) {
-      console.log("Select Product Size");
-      return;
+    try {
+      const result = await axios.get(serverUrl + "/api/cart/get", {
+        withCredentials: true,
+      });
+
+      setCartItem(result.data || {});
+    } catch (err) {
+      console.log("Cart Fetch Error:", err);
+      setCartItem({});
     }
+  };
 
-    let cartData = structuredClone(cartItem); // Clone the product
+  // ==============================
+  // ADD TO CART
+  // ==============================
+  const addtoCart = async (itemId, size) => {
+    if (!size) return toast.error("Select size!");
 
-    if (cartData[itemId]) {
-      if (cartData[itemId][size]) {
-        cartData[itemId][size] += 1;
-      } else {
-        cartData[itemId][size] = 1;
-      }
-    } else {
-      cartData[itemId] = {};
-      cartData[itemId][size] = 1;
-    }
-  
+    let cartData = structuredClone(cartItem);
+
+    if (!cartData[itemId]) cartData[itemId] = {};
+    cartData[itemId][size] = (cartData[itemId][size] || 0) + 1;
+
     setCartItem(cartData);
-  
 
-    if (userData) {
-      setLoading(true)
-      try {
-      let result = await axios.post(serverUrl + "/api/cart/add" , {itemId,size} , {withCredentials: true})
-      console.log(result.data)
-      toast.success("Product Added")
-      setLoading(false)
+    if (!userData) return;
 
+    setLoading(true);
+    try {
+      await axios.post(
+        serverUrl + "/api/cart/add",
+        { itemId, size },
+        { withCredentials: true }
+      );
 
-       
+      toast.success("Added to cart");
+      await getUserCart();
+    } catch (err) {
+      toast.error("Could not add");
+      console.log(err);
+    }
+
+    setLoading(false);
+  };
+
+  // ==============================
+  // REMOVE FROM CART
+  // ==============================
+  const removeFromCart = async (itemId, size) => {
+    let cartData = structuredClone(cartItem);
+
+    delete cartData[itemId][size];
+
+    if (Object.keys(cartData[itemId]).length === 0) {
+      delete cartData[itemId];
+    }
+
+    setCartItem(cartData);
+
+    if (!userData) return;
+
+    try {
+      await axios.delete(serverUrl + "/api/cart/remove", {
+        data: { itemId, size },
+        withCredentials: true,
+      });
+
+      await getUserCart();
+      toast.success("Removed from cart");
+    } catch (err) {
+      toast.error("Remove failed");
+      console.log(err);
+    }
+  };
+
+  // ==============================
+  // UPDATE QUANTITY
+  // ==============================
+  const updateQuantity = async (itemId, size, quantity) => {
+    let cartData = structuredClone(cartItem);
+
+    cartData[itemId][size] = quantity;
+    setCartItem(cartData);
+
+    if (!userData) return;
+
+    try {
+      await axios.put(
+        serverUrl + "/api/cart/update",
+        { itemId, size, quantity },
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ==============================
+  // COUNT TOTAL ITEMS
+  // ==============================
+  const getCartCount = () => {
+    let total = 0;
+
+    for (let id in cartItem) {
+      for (let size in cartItem[id]) {
+        total += cartItem[id][size];
       }
-      catch (error) {
-        console.log(error)
-        setLoading(false)
-        toast.error("Add Cart Error")
-       
-      }
-     
-    } 
     }
 
+    return total;
+  };
 
-    const getUserCart = async () => {
-      try {
-        const result = await axios.post(serverUrl + '/api/cart/get',{},{ withCredentials: true })
-
-      setCartItem(result.data)
-    } catch (error) {
-      console.log(error)
-     
-
-
-    }
-      
-    }
-    const updateQuantity = async (itemId , size , quantity) => {
-      let cartData = structuredClone(cartItem);
-    cartData[itemId][size] = quantity
-    setCartItem(cartData)
-
-    if (userData) {
-      try {
-        await axios.post(serverUrl + "/api/cart/update", { itemId, size, quantity }, { withCredentials: true })
-      } catch (error) {
-        console.log(error)
-        
-      }
-    }
-      
-    }
-     const getCartCount = () => {
-    let totalCount = 0;
-    for (const items in cartItem) {
-      for (const item in cartItem[items]) {
-        try {
-          if (cartItem[items][item] > 0) {
-            totalCount += cartItem[items][item]
-          }
-        } catch (error) {
-
-        }
-      }
-    }
-    return totalCount
-  }
-
+  // ==============================
+  // TOTAL CART AMOUNT
+  // ==============================
   const getCartAmount = () => {
-  let totalAmount = 0;
-    for (const items in cartItem) {
-      let itemInfo = products.find((product) => product._id === items);
-      for (const item in cartItem[items]) {
-        try {
-          if (cartItem[items][item] > 0) {
-            totalAmount += itemInfo.price * cartItem[items][item];
-          }
-        } catch (error) {
+    let total = 0;
 
-        }
+    for (let id in cartItem) {
+      const product = products.find((item) => item._id === id);
+      if (!product) continue;
+
+      for (let size in cartItem[id]) {
+        total += product.price * cartItem[id][size];
       }
     }
-    return totalAmount
-    
-  }
 
-    useEffect(()=>{
-     getProducts()
-    },[])
+    return total;
+  };
 
-    useEffect(() => {
-    getUserCart()
-  },[])
+  // ==============================
+  // AUTO LOAD
+  // ==============================
+  useEffect(() => {
+    getProducts();
+  }, []);
 
+  useEffect(() => {
+    getUserCart();
+  }, [userData]);
 
+  const value = {
+    products,
+    currency,
+    delivery_fee,
+    search,
+    setSearch,
+    showSearch,
+    setShowSearch,
+    cartItem,
+    addtoCart,
+    removeFromCart,
+    getCartCount,
+    updateQuantity,
+    getCartAmount,
+    loading,
+  };
 
-
-
-
-    let value = {
-      products, currency , delivery_fee,getProducts,search,setSearch,showSearch,setShowSearch,cartItem, addtoCart, getCartCount, setCartItem ,updateQuantity,getCartAmount,loading
-    }
   return (
-    <div>
     <shopDataContext.Provider value={value}>
       {children}
-      </shopDataContext.Provider>
-    </div>
-  )
+    </shopDataContext.Provider>
+  );
 }
 
-export default ShopContext
+export default ShopContext;
