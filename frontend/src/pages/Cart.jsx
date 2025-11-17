@@ -3,7 +3,7 @@ import { shopDataContext } from "../context/ShopContext";
 import { useNavigate } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
 import Loading from "../component/Loading";
-import { authDataContext } from "../context/authContext";
+import { authDataContext } from "../context/AuthContext";
 
 function Cart() {
   const {
