@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import Navbar from "../component/Nav";
 import Footer from "../component/Footer";
-import { authDataContext } from "../context/authContext";
+import { authDataContext } from "../context/AuthContext";
 
 function Contact() {
   const { serverUrl } = useContext(authDataContext); // Get backend URL from context
