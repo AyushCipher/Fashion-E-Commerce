@@ -27,7 +27,7 @@ app.use(cookieParser());
 // CORS config
 app.use(
   cors({
-    origin: ['https://onecart-e-commerce-frontend-md2n.onrender.com', 'http://localhost:5174'], // frontend URLs
+    origin: ['https://onecart-e-commerce-frontend-md2n.onrender.com', 'https://onecart-e-commerce-admin-8lbg.onrender.com'], // frontend URLs
     credentials: true, // allow cookies to be sent
   })
 );
