@@ -64,20 +64,33 @@ function Nav() {
             <input type="text" className='lg:w-[50%] w-[80%] h-[60%] bg-[#233533] rounded-[30px] px-[50px] placeholder:text-white text-[white] text-[18px]' placeholder='Search Here' onChange={(e)=>{setSearch(e.target.value)}} value={search} />
         </div>}
 
-       {showProfile && <div className='absolute w-[220px] h-[150px] bg-[#000000d7] top-[110%] right-[4%] border-[1px] border-[#aaa9a9] rounded-[10px] z-10'>
-            <ul className='w-[100%] h-[100%] flex items-start justify-around flex-col text-[17px] py-[10px] text-[white]'>
-                {!userData && <li className='w-[100%] hover:bg-[#2f2f2f]  px-[15px] py-[10px] cursor-pointer' onClick={()=>{
-                    navigate("/login");
-                    setShowProfile(false)
-                }}>Login</li>}
-                {userData && <li className='w-[100%] hover:bg-[#2f2f2f] px-[15px] py-[10px] cursor-pointer' onClick={()=>{
-                    handleLogout();
-                    setShowProfile(false)
-                    }}>LogOut</li>} 
-                <li className='w-[100%] hover:bg-[#2f2f2f] px-[15px] py-[10px] cursor-pointer'onClick={()=>{navigate("/order");setShowProfile(false)}} >Orders</li>
-                <li className='w-[100%] hover:bg-[#2f2f2f] px-[15px] py-[10px] cursor-pointer'onClick={()=>{navigate("/about");setShowProfile(false)}} >About</li>
-            </ul>
-        </div>}
+             {showProfile && (
+                 <div className='absolute w-[220px] h-[150px] bg-[#000000d7] top-[110%] right-[4%] border-[1px] border-[#aaa9a9] rounded-[10px] z-10'>
+                     <ul className='w-[100%] h-[100%] flex items-start justify-around flex-col text-[17px] py-[10px] text-[white]'>
+                         {!userData && (
+                             <li className='w-[100%] hover:bg-[#2f2f2f]  px-[15px] py-[10px] cursor-pointer' onClick={() => {
+                                 navigate("/login");
+                                 setShowProfile(false);
+                             }}>Login</li>
+                         )}
+                         {userData && (
+                             <>
+                                 <li className='w-[100%] font-bold px-[15px] py-[10px] cursor-default select-none'>
+                                     {userData?.name}
+                                 </li>
+                                 <li className='w-[100%] hover:bg-[#2f2f2f] px-[15px] py-[10px] cursor-pointer' onClick={() => {
+                                     navigate("/order");
+                                     setShowProfile(false);
+                                 }}>My Orders</li>
+                                 <li className='w-[100%] hover:bg-[#2f2f2f] px-[15px] py-[10px] cursor-pointer' onClick={() => {
+                                     handleLogout();
+                                     setShowProfile(false);
+                                 }}>Logout</li>
+                             </>
+                         )}
+                     </ul>
+                 </div>
+             )}
 
 
 

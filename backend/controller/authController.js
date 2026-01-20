@@ -1,3 +1,27 @@
+// ======================== ADMIN LOGIN ========================
+export const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      // Generate a JWT token for admin
+      const token = genToken(email); // or use a static id, e.g., "admin"
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      return res.status(200).json({ message: "Admin Login Successful", admin: { email } });
+    } else {
+      return res.status(401).json({ message: "Invalid admin credentials" });
+    }
+  } catch (err) {
+    return res.status(500).json({ message: `Admin Login Error: ${err.message}` });
+  }
+};
 import User from "../model/userModel.js";
 import validator from "validator";
 import bcrypt from "bcryptjs";
